@@ -37,9 +37,8 @@ def main():
       help='stop after this many steps (default: zero: never stop)')
   p.add_argument('-num_steps', type=int, default=10,
       help='run this many optimizer steps at a time')
-  #TODO
-  #p.add_argument('-fps', type=float, default=5,
-  #    help='how often to update the viewer, set to zero to disable viewer')
+  p.add_argument('-fps', type=float, default=5,
+      help='how often to update the viewer, set to zero to disable viewer')
   args = p.parse_args()
 
   if not os.path.exists(args.k):
@@ -120,9 +119,43 @@ def main():
   log.log('Current args:', args.__dict__)
   log.log('Starting at step', step)
 
+  def render():
+    """Returns an image showing the current weights and output."""
+    # TODO: vertically align labels.
+    rout = model(input_img).numpy()
+    rdiff = img2 - rout
+    rw = model.layers[0].weights[0].numpy()
+    render_out = util.vstack([
+      util.hstack([
+        util.vstack([util.cache_label('input:'), vimg1], 5),
+        util.vstack([util.cache_label('actual:'),
+          util.border(
+            util.vis_nhwc(rout, doubles=0, gamma=args.gamma), bw*2)], 5),
+        util.vstack([util.cache_label('expected:'), vimg2], 5),
+        ], 5),
+      util.hstack([
+        util.vstack([
+          util.cache_label('difference:'), util.vis_nhwc(rdiff, doubles=0),
+        ], 5),
+        util.vstack([
+          util.cache_label('kernel:'), util.vis_hwoi(rw, doubles=2),
+        ], 5),
+      ], 5),
+    ], 5)
+    render_out = util.border(render_out, 5)
+    return render_out
+
+  if args.fps > 0:
+    v = util.Viewer()
   last_loss = None
   try:
     while True:
+      if args.fps > 0:
+        if not v.running():
+          log.log('Viewer closed.')
+          break
+        if v.passed(1. / args.fps):
+          v.show(render())
       fit = model.fit(input_img, expected_img, epochs=args.num_steps, verbose=0)
       step += fit.epoch[-1] + 1
       loss = fit.history['loss'][-1]
@@ -151,25 +184,6 @@ def delete_me():
         'avg-px-err %.6f' % util.avg_px_err(rdiffcost, args.gamma),
         )
   render_time = [0.]
-  def render():
-    """Returns an image showing the current weights and output."""
-    # TODO: vertically align labels.
-    t0 = time.time()
-    rout, rdiff, rw = sess.run([actual_img, diff, w1])
-    render_out = util.vstack([
-      util.hstack([
-        util.vstack([util.cache_label('input:'), vimg1], 5),
-        util.vstack([util.cache_label('actual:'),
-          util.vis_nhwc(rout, doubles=0, gamma=args.gamma)], 5),
-        util.vstack([util.cache_label('expected:'), vimg2], 5),
-        ], 5),
-      util.cache_label('difference:'), util.vis_nhwc(rdiff, doubles=0),
-      util.cache_label('kernel:'), util.vis_hwoi(rw, doubles=2),
-      ], 5)
-    render_out = util.border(render_out, 5)
-    t1 = time.time()
-    render_time[0] += t1 - t0
-    return render_out
 
   def periodic_save():
     rstep, rdiffcost, rw = sess.run([global_step, diffcost, w1])
