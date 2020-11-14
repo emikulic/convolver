@@ -6,8 +6,6 @@ import tensorflow as tf
 import numpy as np
 import unittest
 
-tf.enable_eager_execution()
-
 def equal(a, b, threshold = 0.001):
   n,h,w,c = a.shape
   a = a.reshape((h,w))

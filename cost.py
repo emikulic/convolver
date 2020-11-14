@@ -15,7 +15,7 @@ def main():
       'Given two images and some kernels, report the difference per kernel.')
   p.add_argument('a', help='input image filename')
   p.add_argument('b', help='expected image filename')
-  p.add_argument('kernels', nargs='*', help='kernel directory')
+  p.add_argument('kernels', nargs='+', help='kernel directory')
   p.add_argument('-gamma', type=float, default=1.0,
       help='gamma correction to use for images (default: no correction)')
   p.add_argument('-crop_x', type=int, default=0,
@@ -33,9 +33,9 @@ def main():
   assert img1.shape == img2.shape, (img1.shape, img2.shape)
   print('# Loaded images. Shape is', img1.shape)
 
+  util.tf_init()
   img_input = tf.constant(img1)
   img_expected = tf.constant(img2)
-  sess = util.make_session()
 
   for kfn in args.kernels:
     step, kernel = util.load_kernel(kfn)
@@ -44,12 +44,12 @@ def main():
 
     # Convolve and calculate costs.
     img_actual = util.convolve(img_input, kernel)
-    dcost = sess.run(util.diff_cost(
-      util.diff(img_actual, img_expected, border)))
-    rcost = sess.run(util.reg_cost(kernel))
+    dcost = util.diff_cost(
+      util.diff(img_actual, img_expected, border))
+    rcost = util.reg_cost(kernel)
 
-    print(kfn, 'n', n, 'diffcost %.12f' % dcost, 'regcost', rcost,
-        'avg-px-err', util.avg_px_err(dcost, args.gamma))
+    print(kfn, 'n', n, 'diffcost %.12f' % dcost.numpy(), 'regcost',
+        rcost.numpy(), 'avg-px-err', util.avg_px_err(dcost, args.gamma))
 
 if __name__ == '__main__':
   main()

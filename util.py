@@ -360,16 +360,15 @@ def memoize(fn):
 
 cache_label = memoize(make_label)
 
-def make_session(outdir=None):
-  # CUDA_UNKNOWN_ERROR -> try: sudo modprobe -v nvidia-uvm
-  sys.stderr.write('\033[30;1mtensorflow version ' + tf.VERSION + '\n')
-  tf.summary.merge_all()
-  sess = tf.Session()
-  if outdir is not None:
-    tf.summary.FileWriter(outdir, sess.graph)
-  sess.run(tf.global_variables_initializer())
-  sys.stderr.write('\033[0m\n')
-  return sess
+def tf_init():
+  """
+  Force tf to initialize in a subdued tone.
+  """
+  sys.stderr.write('\033[30;1m')
+  sys.stderr.flush()
+  tf.constant(0)
+  sys.stderr.write('\033[0m')
+  sys.stderr.flush()
 
 def save_image(fn, img):
   assert img.dtype == np.uint8

@@ -22,9 +22,9 @@ def main():
   assert n == 1, n
   out = np.zeros((h,w,c), dtype=np.float32)
   step, kernel = util.load_kernel(args.k)
-  sess = util.make_session()
+  util.tf_init()
   for i in range(c):
-    chan = sess.run(util.convolve(tf.constant(img[:,:,:,i:i+1]), kernel))
+    chan = util.convolve(tf.constant(img[:,:,:,i:i+1]), kernel)
     out[:,:,i] = chan[0,:,:,0]
   out = util.from_float(out, args.gamma)
 
