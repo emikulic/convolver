@@ -154,6 +154,10 @@ thousand steps each.
 
 * `-num_steps` - log progress after this many steps of the optimizer.
 
+* `-crop_{x,y,w,h}` - when optimizing, only consider the window starting
+at (x,y) with size (w,h).
+By default, the entire input image is used.
+
 * `-fps` - how many times per second to update the progress image.
 Set to zero to disable the viewer and run headless.
 

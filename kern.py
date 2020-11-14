@@ -41,6 +41,14 @@ def main():
       help='stop after this many steps (default: zero: never stop)')
   p.add_argument('-num_steps', type=int, default=10,
       help='run this many optimizer steps at a time')
+  p.add_argument('-crop_x', type=int, default=0,
+      help='crop X offset in pixels, range is [0..width-1]')
+  p.add_argument('-crop_y', type=int, default=0,
+      help='crop Y offset in pixels, range is [0..height-1] where 0 is the TOP')
+  p.add_argument('-crop_w', type=int, default=0,
+      help='crop width in pixels')
+  p.add_argument('-crop_h', type=int, default=0,
+      help='crop height in pixels')
   p.add_argument('-fps', type=float, default=5,
       help='how often to update the viewer, set to zero to disable viewer')
   args = p.parse_args()
