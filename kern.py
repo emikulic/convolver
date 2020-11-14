@@ -32,6 +32,9 @@ def main():
       help='kernel will be symmetric if set to True (default: True)')
   p.add_argument('-gamma', type=float, default=1.0,
       help='gamma correction to use for images (default: no correction)')
+  p.add_argument('-reg_cost', type=float, default=0.00001,
+      help='regularization cost: pressures the optimizer to minimize the '
+      'weights in the kernel')
   p.add_argument('-learn_rate', type=float, default=2.**-10,
       help='learning rate for the optimizer')
   p.add_argument('-max_steps', type=int, default=0,
@@ -91,7 +94,7 @@ def main():
       kernel_size=weights.shape[0],
       padding='valid',
       use_bias=False,
-      kernel_regularizer=keras.regularizers.l1(0.000001), # todo: make tunable
+      kernel_regularizer=keras.regularizers.l1(args.reg_cost),
       weights=[weights],
       )
   ])
