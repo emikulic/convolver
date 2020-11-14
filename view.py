@@ -12,7 +12,7 @@ def main():
   p = argparse.ArgumentParser(description =
       'Display a kernel.')
   p.add_argument('-out', help='output to *.png file instead of viewing')
-  p.add_argument('k', nargs='*', help='path to kernel(s)')
+  p.add_argument('k', nargs='+', help='path to kernel(s)')
   args = p.parse_args()
 
   out = None
