@@ -26,6 +26,7 @@ def main():
   p.add_argument('-n', type=int, default=5,
       help='kernel size is NxN (default: 5, or automatically set to size '
       'of loaded kernel)')
+  # TODO: symmetry doesn't work yet.
   p.add_argument('-sym', type=boolchoice, default=True,
       choices=[True, False],
       help='kernel will be symmetric if set to True (default: True)')
@@ -45,10 +46,10 @@ def main():
     os.mkdir(args.k)
     step = -1
   else:
-    step, w1 = util.load_kernel(args.k)
-    args.n = w1.shape[0]
+    step, weights = util.load_kernel(args.k)
+    args.n = weights.shape[0]
 
-  if step >= args.max_steps and args.max_steps != 0:
+  if step >= args.max_steps and args.max_steps > 0:
     print('Current step %d is over max %d. Exiting.' % (step, args.max_steps))
     return 0
 
@@ -68,33 +69,33 @@ def main():
 
   # Load or initialize weights.
   if step >= 0:
-    # TODO rename w1
     log.log('Loaded weights.')
   else:
     assert step == -1, step
     step = 0
     log.log('Starting with random weights.')
-    w1 = np.random.normal(size=(args.n, args.n, 1, 1),
+    weights = np.random.normal(size=(args.n, args.n, 1, 1),
         scale=.2).astype(np.float32)
     m = args.n // 2
-    w1[m,m,0,0] = 1.  # Bright middle pixel.
+    weights[m,m,0,0] = 1.  # Bright middle pixel.
   if args.sym:
-    w1 = util.make_symmetric(w1)
+    weights = util.make_symmetric(weights)
   else:
-    w1 = tf.Variable(w1)
-  log.log('Weights shape is', w1.shape)
+    weights = tf.Variable(weights)
+  log.log('Weights shape is', weights.shape)
 
   # Build convolution model.
   model = keras.Sequential([
     keras.layers.DepthwiseConv2D(
       input_shape=img1.shape[1:],
-      kernel_size=w1.shape[0],
+      kernel_size=weights.shape[0],
       padding='valid',
       use_bias=False,
       kernel_regularizer=keras.regularizers.l1(0.000001), # todo: make tunable
-      weights=[w1],
+      weights=[weights],
       )
   ])
+  del weights
 
   # Remove pixels outside of convolution output.
   _,ih,iw,_ = img1.shape
@@ -103,6 +104,7 @@ def main():
   assert (iw - ow) % 2 == 0, (iw, ow)
   bh = (ih - oh) // 2
   bw = (iw - ow) // 2
+  assert bw == bh, (bw, bh)
   img2 = img2[:, bh:-bh, bw:-bw, :]
 
   input_img = tf.constant(img1)
@@ -135,7 +137,8 @@ def main():
         ], 5),
       util.hstack([
         util.vstack([
-          util.cache_label('difference:'), util.vis_nhwc(rdiff, doubles=0),
+          util.cache_label('difference:'),
+          util.border(util.vis_nhwc(rdiff, doubles=0), bw*2),
         ], 5),
         util.vstack([
           util.cache_label('kernel:'), util.vis_hwoi(rw, doubles=2),
@@ -157,7 +160,7 @@ def main():
         if v.passed(1. / args.fps):
           v.show(render())
       fit = model.fit(input_img, expected_img, epochs=args.num_steps, verbose=0)
-      step += fit.epoch[-1] + 1
+      step += args.num_steps
       loss = fit.history['loss'][-1]
       saved = ''
       if last_loss is None or loss < last_loss:
@@ -165,31 +168,13 @@ def main():
         saved = ' (saved)'
         util.save_kernel(args.k, step, model.layers[0].weights[0].numpy())
       log.log(f'step {step} loss {loss:.9f}{saved}')
-      if args.max_steps > 0 and step >= args.max_steps:
+      if step >= args.max_steps and args.max_steps > 0:
         log.log(f'Hit max_steps={args.max_steps}')
         break
   except KeyboardInterrupt:
     pass
   log.log('Stopped.')
   log.close()
-
-def delete_me():
-  if False:
-    rstep, rcost, rreg, rdiffcost = sess.run([
-      global_step, cost, reg, diffcost])
-    log.log('steps', rstep,
-        'total-cost %.9f' % rcost,
-        'diffcost %.9f' % rdiffcost,
-        'reg %.9f' % rreg,
-        'avg-px-err %.6f' % util.avg_px_err(rdiffcost, args.gamma),
-        )
-  render_time = [0.]
-
-  def periodic_save():
-    rstep, rdiffcost, rw = sess.run([global_step, diffcost, w1])
-    util.save_kernel(args.k, rstep, rw)
-    rfn = args.k+'/render-step%08d-diff%.9f.png' % (rstep, rdiffcost)
-    util.save_image(rfn, render())
 
 if __name__ == '__main__':
   main()
