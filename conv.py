@@ -33,7 +33,7 @@ def main():
     print('Written to', args.out)
   else:
     print('Press ESC to close window.')
-    util.viewer(None, lambda: out)
+    util.show(out)
 
 if __name__ == '__main__':
   main()

@@ -399,4 +399,50 @@ assert np.all(rgbify(np.array(
      [[1,1,1],[2,2,2],[3,3,3]],
      [[4,4,4],[5,5,5],[6,6,6]]])
 
+class Viewer:
+  def __init__(self):
+    import pygame
+    pygame.init()
+    self.pygame_ = pygame
+    self.res_ = None
+    self.last_update_ = 0
+    self.screen_ = None
+    self.is_running_ = True
+
+  def passed(self, secs):
+    """Returns True if at least `secs` have passed since the last show()."""
+    return time.time() >= self.last_update_ + secs
+
+  def show(self, img):
+    h,w,_ = img.shape
+    res = (w,h)
+    if self.res_ is None or self.res_ != res:
+      self.screen_ = self.pygame_.display.set_mode(res)
+      self.res_ = res
+    img = img.swapaxes(0,1)
+    self.pygame_.surfarray.blit_array(self.screen_, img)
+    self.pygame_.display.flip()
+    self.last_update_ = time.time()
+
+  def _handle_events(self, events=[]):
+    for event in events + self.pygame_.event.get():
+      if event.type == self.pygame_.QUIT:
+        self.is_running_ = False
+      elif event.type == self.pygame_.KEYDOWN:
+        if event.key in (27, ord('q')):
+          self.is_running_ = False
+
+  def running(self):
+    self._handle_events()
+    return self.is_running_
+
+  def wait(self):
+    while self.running():
+      self._handle_events([self.pygame_.event.wait()])
+
+def show(img):
+  v = Viewer()
+  v.show(img)
+  v.wait()
+
 # vim:set ts=2 sw=2 sts=2 et:

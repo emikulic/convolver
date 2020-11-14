@@ -44,8 +44,7 @@ def main():
     print('Written to', args.out)
   else:
     print('Press ESC to close window.')
-    def render_fn(): return out
-    util.viewer(None, render_fn)
+    util.show(out)
 
 if __name__ == '__main__':
   main()
