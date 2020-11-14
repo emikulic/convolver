@@ -175,12 +175,12 @@ Example:
 
 ### plot.sh
 
-Uses gnuplot to plot the cost (total-cost and diff-cost as two lines) against
+Uses gnuplot to plot the loss against
 the step number, based on a kernel's `log.txt` file.
 Example:
 
 ```shell
-./plot.sh kernel-1
+./plot.sh kernel-1 kernel-2
 ```
 
 ### resize.py
