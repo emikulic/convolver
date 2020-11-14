@@ -46,10 +46,9 @@ def main():
     img_actual = util.convolve(img_input, kernel)
     dcost = util.diff_cost(
       util.diff(img_actual, img_expected, border))
-    rcost = util.reg_cost(kernel)
 
-    print(kfn, 'n', n, 'diffcost %.12f' % dcost.numpy(), 'regcost',
-        rcost.numpy(), 'avg-px-err', util.avg_px_err(dcost, args.gamma))
+    print(kfn, 'n', n, 'diffcost %.12f' % dcost.numpy(),
+        'avg-px-err', util.avg_px_err(dcost, args.gamma))
 
 if __name__ == '__main__':
   main()
