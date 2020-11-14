@@ -18,14 +18,6 @@ And convolving it with the deblur kernel:
 
 ![kernel](data/k1.2.png)
 
-The convolution operation is:
-
-```python
-output_img = tf.nn.conv2d(input_img, kernel)
-```
-
-(the other 1000+ lines of Python are basically overhead)
-
 `conv.py` calculates `output_img`.
 
 `kern.py` calculates `kernel`.
@@ -157,32 +149,17 @@ By default, there's no gamma correction.
 
 * `-reg_cost` is used to regularize the kernel, i.e. put pressure on the
 optimizer to minimize the values in the kernel.
-The sum of absolute kernel values is multiplied by `reg_cost` and added
-to the overall cost.
-
-* `-border` is set by default to `-n` divided by two.
-It's the number of pixels discarded from each edge when evaluating
-the output.
 
 * `-learn_rate` is the learning rate for the optimizer.
 If the optimizer is not converging, change the learning rate.
 If that doesn't work, change the learning rate more.
-
-* `-epsilon` is a Greek letter.
 
 * `-max_steps` - exit after this many steps. The default is to run forever.
 This option is useful if you're doing a parameter sweep and you want to
 e.g. make a shell script that trains ten kernels with different settings with a
 thousand steps each.
 
-* `-log_every` - log progress after this many steps of the optimizer.
-
-* `-save_every` - save a snapshot to the kernel directory after this
-many steps of the optimizer.
-
-* `-crop_{x,y,w,h}` - when optimizing, only consider the window starting
-at (x,y) with size (w,h).
-By default, the entire input image is used.
+* `-num_steps` - log progress after this many steps of the optimizer.
 
 * `-fps` - how many times per second to update the progress image.
 Set to zero to disable the viewer and run headless.
