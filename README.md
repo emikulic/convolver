@@ -43,13 +43,6 @@ It does this using gradient descent.
 
 ## Installing this software
 
-Optionally, do this in a Docker container (this is how I tested it):
-
-```shell
-docker run -it debian:buster-slim bash
-apt update
-```
-
 Optionally, set up a virtualenv:
 
 ```shell
@@ -61,8 +54,8 @@ source my_env/bin/activate
 Install dependencies:
 
 ```shell
-apt install python3 python3-pip python3-dev build-essential pkg-config libglib2.0-dev libgirepository1.0-dev libcairo2-dev libgtk-3-dev
-pip3 install tensorflow pillow pycairo pygobject
+apt install python3 python3-pip python3-dev build-essential libcairo2-dev
+pip3 install tensorflow pillow pycairo pygame
 ```
 
 Install convolver:
