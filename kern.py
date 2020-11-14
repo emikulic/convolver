@@ -89,10 +89,11 @@ def main():
         scale=.2).astype(np.float32)
     m = args.n // 2
     weights[m,m,0,0] = 1.  # Bright middle pixel.
-  if args.sym:
-    weights = util.make_symmetric(weights)
-  else:
-    weights = tf.Variable(weights)
+    util.save_kernel(args.k, step, weights)
+  #if args.sym:
+  #  weights = util.make_symmetric(weights)
+  #else:
+  #  weights = tf.Variable(weights)
   log.log('Weights shape is', weights.shape)
 
   # Build convolution model.
