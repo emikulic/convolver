@@ -72,12 +72,6 @@ def diff_cost(diff):
   """
   return tf.reduce_mean(tf.square(diff))  # L2
 
-def reg_cost(kern):
-  """
-  Returns a tf scalar that's the regularization cost of the kernel.
-  """
-  return tf.reduce_sum(tf.abs(kern))  # L1
-
 def avg_px_err(dcost, gamma):
   return np.sqrt(np.power(dcost, 1./gamma)) * 255.
 
@@ -136,21 +130,6 @@ def from_float_fast(img):
 def shape(t):
   """Returns shape of tensor as list of ints."""
   return [-1 if x is None else x for x in t.get_shape().as_list()]
-
-def make_symmetric(a):
-  # TODO: support making the kernel bigger.
-  h,w,i,o = a.shape
-  assert i == 1, i
-  assert o == 1, o
-  assert h == w, ['must be square', h, 'x', w]
-  assert h % 2 == 1, ['size must be an odd number', h]
-  sz = h // 2 + 1
-  w = a[0:sz, 0:sz, :, :]
-  w = tf.Variable(w)
-  ur = tf.reverse(tf.slice(w, [0,0,0,0], [sz, sz-1, 1, 1]), [1])
-  u = tf.concat([w, ur], 1)
-  l = tf.reverse(tf.slice(u, [0,0,0,0], [sz-1, h, 1, 1]), [0])
-  return tf.concat([u,l], 0)
 
 def rm_border(t, border):
   """
