@@ -26,10 +26,6 @@ def main():
   p.add_argument('-n', type=int, default=5,
       help='kernel size is NxN (default: 5, or automatically set to size '
       'of loaded kernel)')
-  # TODO: symmetry doesn't work yet.
-  p.add_argument('-sym', type=boolchoice, default=True,
-      choices=[True, False],
-      help='kernel will be symmetric if set to True (default: True)')
   p.add_argument('-gamma', type=float, default=1.0,
       help='gamma correction to use for images (default: no correction)')
   p.add_argument('-reg_cost', type=float, default=0.00001,
@@ -90,10 +86,6 @@ def main():
     m = args.n // 2
     weights[m,m,0,0] = 1.  # Bright middle pixel.
     util.save_kernel(args.k, step, weights)
-  #if args.sym:
-  #  weights = util.make_symmetric(weights)
-  #else:
-  #  weights = tf.Variable(weights)
   log.log('Weights shape is', weights.shape)
 
   # Build convolution model.

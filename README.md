@@ -133,10 +133,6 @@ You probably want this to be an odd number.
 Larger kernels are slower and cause more artifacts at the edge of the output,
 but are otherwise more accurate.
 
-* `-sym False` will produce a non-symmetric kernel.
-If the blur was symmetric, then you can use a symmetric deblur kernel, which
-is the default.
-
 * `-gamma` can be used to set the input image's gamma.
 By default, there's no gamma correction.
 
